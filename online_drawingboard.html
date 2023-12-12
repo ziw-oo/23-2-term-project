@@ -67,7 +67,7 @@
                 isDown = false;
             });
 
-            // 입력 양식 이벤트를 연결합니다.
+            // 입력 양식 이벤트 연결
             $('#pen').click(function () {
                 width = 1;
                 color = '#30cfd0';
@@ -81,7 +81,7 @@
             $('#width').change(function () {
                 width = $(this).val()
             });
-            // 소켓 이벤트를 연결합니다.
+            // 소켓 이벤트 연결
             socket.on('line', function (data) {
                 context.beginPath();
                 context.lineWidth = data.width;
