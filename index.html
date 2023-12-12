@@ -2,18 +2,17 @@
 <html>
 <head>
     <title></title>
-    <p> 2302606 최지우 </p>
     <style>
         canvas {
-            border: 1px solid black;
+            border: 5px solid palevioletred;
         }
     </style>
-    <script src="jquery-3.6.0.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <script>
         $(document).ready(function () {
             // 변수 선언
-            let color = 'black';
+            let color = 'navy';
             let width = 1;
             let isDown = false;
             let newPoint, oldPoint;
@@ -22,20 +21,34 @@
             // 캔버스 추출
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
-            // 마우스 이벤트 연결
-            $(canvas).mousedown(function (event) {
+
+            // 마우스 이벤트
+            canvas.addEventListener('mousedown', (event) => {   //canvas.addEventListener: 이미지를 마우스 커서로 만들기
                 isDown = true;
                 oldPoint = {
-                    x: event.pageX - $(this).position().left,
-                    y: event.pageY - $(this).position().top
+                    x: event.pageX - canvas.offsetLeft, // 속성의 왼쪽 경계가 부모 요소의 왼쪽 경계에서 얼마나 떨어져있는지
+                    y: event.pageY - canvas.offsetTop
                 };
             });
-            $(canvas).mousemove(function (event) {
+
+            canvas.addEventListener('mousemove', (event) => {
                 if (!isDown) { return; }
-                newPoint = {
-                    x: event.pageX - $(this).position().left,
-                    y: event.pageY - $(this).position().top
+                const newPoint = {
+                    x: event.pageX - canvas.offsetLeft,
+                    y: event.pageY - canvas.offsetTop
                 };
+
+                context.lineWidth = width;  // 선 굵기
+                context.lineCap = 'round';  // 선의 시작, 끝을 둥글게
+                context.strokeStyle = color;    // 선 색깔
+
+                context.beginPath();    // 경로 시작
+                context.moveTo(oldPoint.x, oldPoint.y);   // 시작점 지정
+                context.lineTo(newPoint.x, newPoint.y);   // 이을 점
+                context.stroke();       // 실제로 그림
+                context.closePath();
+
+
                 socket.emit('line', {
                     x1: oldPoint.x,
                     y1: oldPoint.y,
@@ -44,16 +57,16 @@
                     color: color,
                     width: width
                 });
-                oldPoint = newPoint;
+                
+               oldPoint = newPoint;
+
             });
-            $(canvas).mouseup(function (event) {
+
+            canvas.addEventListener('mouseup', () => {
                 isDown = false;
-                oldPoint = {
-                    x: event.pageX - $(this).position().left,
-                    y: event.pageY - $(this).position().top
-                };
             });
-            // 입력 양식 이벤트 연결
+
+            // 입력 양식 이벤트를 연결합니다.
             $('#pen').click(function () {
                 width = 1;
                 color = 'black';
@@ -67,10 +80,10 @@
             $('#width').change(function () {
                 width = $(this).val()
             });
-            // 소켓 이벤트 연결
+            // 소켓 이벤트를 연결합니다.
             socket.on('line', function (data) {
                 context.beginPath();
-                                context.lineWidth = data.width;
+                context.lineWidth = data.width;
                 context.strokeStyle = data.color;
                 context.moveTo(data.x1, data.y1);
                 context.lineTo(data.x2, data.y2);
